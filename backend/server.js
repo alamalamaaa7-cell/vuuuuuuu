@@ -31,6 +31,11 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '2mb' }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// ===== INI TAMBAHAN BARU BUAT SERVE UI =====
+// 1. Serve semua file di folder publik di root
+app.use(express.static(path.join(__dirname, '..', 'publik')));
+// ===========================================
+
 // ---------------- Socket.IO (real-time admin dashboard) ----------------
 const io = new Server(server, { cors: corsOptions });
 app.set('io', io);
@@ -42,9 +47,7 @@ io.use((socket, next) => {
       const payload = jwt.verify(token, process.env.JWT_SECRET);
       socket.user = payload;
     }
-  } catch (err) {
-    // token invalid -> anggap tamu, tidak fatal
-  }
+  } catch (err) {}
   next();
 });
 
@@ -56,7 +59,8 @@ io.on('connection', (socket) => {
 });
 
 // ---------------- REST Routes ----------------
-app.get('/', (req, res) => {
+// GANTI DARI '/' JADI '/api/status'
+app.get('/api/status', (req, res) => {
   res.json({ ok: true, name: 'UpclaseLam API', status: 'running' });
 });
 app.get('/health', (req, res) => res.json({ ok: true, time: new Date().toISOString() }));
@@ -65,6 +69,13 @@ app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/settings', settingsRoutes);
+
+// ===== INI TAMBAHAN BARU BUAT KIRIM INDEX.HTML =====
+// Kalau bukan /api/ atau /uploads maka kasih index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'publik', 'index.html'));
+});
+// ===================================================
 
 app.use((req, res) => res.status(404).json({ error: 'Endpoint tidak ditemukan.' }));
 // eslint-disable-next-line no-unused-vars
@@ -85,4 +96,3 @@ initSchema()
     console.error('[DB] Gagal inisialisasi schema:', err);
     process.exit(1);
   });
-       
