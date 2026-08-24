@@ -27,14 +27,11 @@ const corsOptions = {
   credentials: true,
 };
 
-app.use(cors(corsOptions));
+app.use(corsOptions));
 app.use(express.json({ limit: '2mb' }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static(path.join(__dirname, '..', 'public')));
-...
-res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
-// ===========================================
 
-// ---------------- Socket.IO (real-time admin dashboard) ----------------
 const io = new Server(server, { cors: corsOptions });
 app.set('io', io);
 
@@ -56,8 +53,6 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {});
 });
 
-// ---------------- REST Routes ----------------
-// GANTI DARI '/' JADI '/api/status'
 app.get('/api/status', (req, res) => {
   res.json({ ok: true, name: 'UpclaseLam API', status: 'running' });
 });
@@ -68,15 +63,11 @@ app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/settings', settingsRoutes);
 
-// ===== INI TAMBAHAN BARU BUAT KIRIM INDEX.HTML =====
-// Kalau bukan /api/ atau /uploads maka kasih index.html
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'publik', 'index.html'));
+  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
-// ===================================================
 
 app.use((req, res) => res.status(404).json({ error: 'Endpoint tidak ditemukan.' }));
-// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ error: err.message || 'Terjadi kesalahan pada server.' });
