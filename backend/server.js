@@ -29,11 +29,9 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '2mb' }));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// ===== INI TAMBAHAN BARU BUAT SERVE UI =====
-// 1. Serve semua file di folder publik di root
-app.use(express.static(path.join(__dirname, '..', 'publik')));
+app.use(express.static(path.join(__dirname, '..', 'public')));
+...
+res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 // ===========================================
 
 // ---------------- Socket.IO (real-time admin dashboard) ----------------
