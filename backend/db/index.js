@@ -1,3 +1,4 @@
+
 // ================================================
 // Koneksi PostgreSQL (real database, bukan localStorage lagi)
 // Bekerja dengan Railway PostgreSQL plugin lewat env DATABASE_URL.
@@ -11,9 +12,7 @@ if (!process.env.DATABASE_URL) {
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes('localhost')
-    ? false
-    : { rejectUnauthorized: false },
+  ssl: { rejectUnauthorized: false }
 });
 
 pool.on('error', (err) => {
