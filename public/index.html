@@ -1,0 +1,1721 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="biru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UpclaseLam</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+  :root {
+    --paper: #F4EBD9; 
+    --paper-alt: #E8DCB8; 
+    --ink: #111827; 
+    --ink-soft: #4B5563;
+    --white-card: #FAF4E8; 
+    --accent: #2563EB; 
+    --accent-dark: #1D4ED8; 
+    --accent-light: #BFDBFE; 
+    --glow: rgba(37,99,235,0.25);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--paper); color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+  ::selection { background: var(--accent); color: #fff; }
+  
+  .display { font-family: 'Space Grotesk', sans-serif; font-weight: 700; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  .grain {
+    position: fixed; inset: 0; pointer-events: none; z-index: 999; opacity: 0.035; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .btn {
+    padding: 10px 20px; border-radius: 12px; font-size: 0.88rem; font-weight: 800; display: inline-flex;
+    align-items: center; justify-content: center; gap: 8px; cursor: pointer; border: 3px solid var(--ink);
+    font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    user-select: none;
+  }
+  .btn-fill { background: var(--accent); color: #fff; box-shadow: 4px 4px 0 var(--ink); }
+  .btn-fill:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+  .btn-line { background: var(--white-card); box-shadow: 4px 4px 0 var(--ink); color: var(--ink); }
+  .btn-line:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+  .btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink) !important; }
+  .btn-sm { padding: 6px 14px; font-size: 0.78rem; border-radius: 10px; box-shadow: 3px 3px 0 var(--ink); }
+
+  .lang-switcher {
+    display: inline-flex; align-items: center; background: var(--paper-alt); border: 2.5px solid var(--ink);
+    border-radius: 12px; padding: 3px; box-shadow: 3px 3px 0 var(--ink); cursor: pointer; user-select: none;
+  }
+  .lang-btn {
+    padding: 4px 10px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    font-weight: 800; transition: all 0.2s; color: var(--ink-soft);
+  }
+  .lang-btn.active { background: var(--accent); color: #ffffff; box-shadow: 1px 1px 0 var(--ink); }
+
+  .media-wrapper {
+    position: relative; width: 100%; border: 3px solid var(--ink);
+    border-radius: 20px; overflow: hidden; background: #0b0f19; box-shadow: 8px 8px 0 var(--ink);
+  }
+  canvas { display: block; width: 100%; height: auto; max-height: 70vh; margin: 0 auto; object-fit: contain; }
+
+  .split-line {
+    position: absolute; top: 0; bottom: 0; width: 4px; background: #ffffff; cursor: ew-resize; z-index: 20;
+    box-shadow: 0 0 15px rgba(255,255,255,0.9); touch-action: none;
+  }
+  .split-line::before {
+    content: ''; position: absolute; top: 0; bottom: 0; left: 50%; width: 44px; transform: translateX(-50%);
+  }
+  .split-button {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 36px; height: 32px;
+    background: var(--accent); border: 3px solid var(--ink); border-radius: 8px; display: flex;
+    align-items: center; justify-content: center; color: #fff; font-weight: 900; font-size: 12px;
+    box-shadow: 3px 3px 0 var(--ink); user-select: none; transition: transform 0.15s;
+  }
+  .split-line:hover .split-button { transform: translate(-50%, -50%) scale(1.1); }
+
+  .panel-card {
+    background: var(--white-card); border: 3px solid var(--ink); border-radius: 24px;
+    box-shadow: 8px 8px 0 var(--ink); padding: 22px; position: relative;
+  }
+  .dropzone {
+    border: 3px dashed var(--accent); border-radius: 18px; padding: 24px 16px; text-align: center;
+    background: var(--accent-light); cursor: pointer; transition: all 0.25s ease;
+  }
+  .dropzone:hover { background: var(--accent); border-color: var(--ink); color: #fff; }
+
+  input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; height: 20px; width: 20px; border-radius: 8px; background: var(--accent);
+    border: 3px solid var(--ink); cursor: pointer; margin-top: -7px; box-shadow: 2px 2px 0 var(--ink);
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    width: 100%; height: 8px; cursor: pointer; background: var(--paper-alt); border-radius: 10px; border: 2px solid var(--ink);
+  }
+
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(17,24,39,0.8); backdrop-filter: blur(6px);
+    z-index: 500; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+  }
+  .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+  .modal-box {
+    background: var(--paper); border: 4px solid var(--ink); border-radius: 28px;
+    box-shadow: 10px 10px 0 var(--ink); width: min(520px, 100%); max-height: 90vh; overflow-y: auto;
+    padding: 24px; position: relative; transform: scale(0.92); transition: transform 0.3s ease;
+  }
+  .modal-overlay.active .modal-box { transform: scale(1); }
+
+  .vip-drawer {
+    position: fixed; top: 0; left: 0; bottom: 0; width: min(460px, 92vw); background: var(--paper);
+    border-right: 4px solid var(--ink); z-index: 501; transform: translateX(-100%);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); padding: 28px 20px; overflow-y: auto;
+    box-shadow: 10px 0 30px rgba(0,0,0,0.3);
+  }
+  .modal-overlay.active .vip-drawer { transform: translateX(0); }
+
+  .toast {
+    position: fixed; top: 20px; right: 20px; background: var(--ink); color: var(--paper);
+    padding: 12px 18px; border-radius: 14px; font-size: 0.82rem; font-family: 'JetBrains Mono', monospace;
+    z-index: 1000; box-shadow: 4px 4px 0 var(--accent); transform: translateY(-100px); opacity: 0; transition: all 0.3s ease;
+    display: flex; align-items: center; gap: 10px; font-weight: 600;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  .scanline {
+    position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0.2));
+    background-size: 100% 4px; opacity: 0.15;
+  }
+</style>
+</head>
+<body class="antialiased">
+
+<div class="grain"></div>
+
+<div id="toast" class="toast">
+  <svg class="w-5 h-5 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+  <span id="toastMsg">Informasi</span>
+</div>
+
+<div class="modal-overlay" id="authModal">
+  <div class="modal-box max-w-md">
+    <div class="flex items-center justify-between pb-3 mb-4 border-b-2 border-[var(--ink)]">
+      <div>
+        <span class="mono text-[10px] uppercase font-extrabold text-[var(--accent-dark)] block" id="langAuthSub">PORTAL AKSES</span>
+        <h3 class="display text-xl font-black" id="langAuthTitle">LOGIN & DAFTAR AKUN</h3>
+      </div>
+      <button onclick="closeAuthModal()" class="w-8 h-8 border-2 border-[var(--ink)] rounded-xl font-bold flex items-center justify-center hover:bg-[var(--accent)] hover:text-white transition">✕</button>
+    </div>
+
+    <div class="grid grid-cols-2 gap-2 mb-4 p-1 bg-[var(--paper-alt)] rounded-xl border-2 border-[var(--ink)]">
+      <button id="tabLoginBtn" onclick="switchAuthTab('login')" class="py-2 text-xs font-extrabold rounded-lg bg-[var(--accent)] text-white shadow-[2px_2px_0_var(--ink)]">Masuk</button>
+      <button id="tabRegisterBtn" onclick="switchAuthTab('register')" class="py-2 text-xs font-extrabold rounded-lg text-[var(--ink)] hover:bg-[var(--white-card)]">Daftar Akun</button>
+    </div>
+
+    <!-- Google Sign-In Button WITH Official Google Logo -->
+    <button onclick="loginWithGoogle()" class="btn btn-line w-full py-3 mb-4 flex items-center justify-center gap-3 font-bold text-xs hover:border-[var(--accent)]">
+      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+      </svg>
+      <span id="langGoogleBtn">Login dengan Google</span>
+    </button>
+
+    <div class="relative flex py-2 items-center mb-4">
+      <div class="flex-grow border-t border-[var(--ink)]"></div>
+      <span class="flex-shrink mx-3 text-[10px] mono uppercase font-bold text-[var(--ink-soft)]">Atau Email</span>
+      <div class="flex-grow border-t border-[var(--ink)]"></div>
+    </div>
+
+    <form id="loginForm" onsubmit="handleAuthSubmit(event)" class="space-y-3">
+      <div>
+        <label class="block text-[11px] font-bold mono uppercase mb-1">Email / Gmail:</label>
+        <input type="email" id="authEmail" required placeholder="user@gmail.com" class="w-full px-3.5 py-2.5 rounded-xl border-2 border-[var(--ink)] bg-white font-mono text-xs focus:outline-none focus:ring-2 focus:ring-[var(--accent)]">
+      </div>
+      <div>
+        <label class="block text-[11px] font-bold mono uppercase mb-1">Kata Sandi:</label>
+        <input type="password" id="authPassword" required placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl border-2 border-[var(--ink)] bg-white font-mono text-xs focus:outline-none focus:ring-2 focus:ring-[var(--accent)]">
+      </div>
+      <button type="submit" id="authSubmitBtn" class="btn btn-fill w-full py-3 text-xs font-bold mt-2">Masuk Sekarang</button>
+    </form>
+  </div>
+</div>
+
+<div class="modal-overlay" id="adminModal">
+  <div class="modal-box max-w-xl">
+    <div class="flex items-center justify-between pb-3 mb-4 border-b-3 border-[var(--ink)]">
+      <div class="flex items-center gap-2">
+        <span class="bg-yellow-400 text-black text-[10px] mono font-bold px-2 py-0.5 rounded border border-[var(--ink)]">ADMIN OWNER</span>
+        <h3 class="display text-lg font-extrabold">PANEL KONTROL UPCLASELAM</h3>
+      </div>
+      <button onclick="closeAdminModal()" class="w-8 h-8 border-2 border-[var(--ink)] rounded-xl font-bold flex items-center justify-center hover:bg-[var(--accent)] hover:text-white transition">✕</button>
+    </div>
+
+    <!-- Admin Section 1: Upload QRIS Foto -->
+    <div class="p-4 rounded-2xl bg-[var(--white-card)] border-2 border-[var(--ink)] shadow-[4px_4px_0_var(--ink)] mb-5">
+      <h4 class="font-bold text-xs uppercase mono mb-2 flex items-center gap-2">
+        <svg class="w-4 h-4 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+        Upload Foto QRIS Pembayaran
+      </h4>
+      <div class="flex flex-col sm:flex-row items-center gap-4">
+        <div class="w-24 h-24 border-2 border-[var(--ink)] rounded-xl overflow-hidden bg-white shrink-0 flex items-center justify-center p-1">
+          <img id="adminQrisPreview" src="" alt="QRIS Preview" class="max-w-full max-h-full object-contain">
+        </div>
+        <div class="grow space-y-2 w-full">
+          <input type="file" id="adminQrisInput" accept="image/*" class="hidden" onchange="handleQrisUpload(event)">
+          <button onclick="document.getElementById('adminQrisInput').click()" class="btn btn-line btn-sm w-full">Ganti Foto QRIS Pembayaran</button>
+          <p class="text-[10px] mono text-[var(--ink-soft)]">Upload QRIS Anda di sini. Pengguna yang akan membeli paket akan langsung melihat gambar QRIS ini.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Section 2: Create VIP User -->
+    <div class="p-4 rounded-2xl bg-[var(--white-card)] border-2 border-[var(--ink)] shadow-[4px_4px_0_var(--ink)] mb-5">
+      <h4 class="font-bold text-xs uppercase mono mb-3">Tambah / Set Status Paket VIP User</h4>
+      <form onsubmit="adminGrantVip(event)" class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold mono uppercase mb-1">Gmail User Target:</label>
+          <input type="email" id="adminTargetEmail" required placeholder="user@gmail.com" class="w-full px-3 py-2 rounded-xl border-2 border-[var(--ink)] bg-white font-mono text-xs focus:outline-none focus:ring-2 focus:ring-[var(--accent)]">
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold mono uppercase mb-1">Pilih Paket VIP:</label>
+            <select id="adminSelectPackage" class="w-full px-3 py-2 rounded-xl border-2 border-[var(--ink)] bg-white font-mono text-xs focus:outline-none focus:ring-2 focus:ring-[var(--accent)] font-bold">
+              <option value="basic">Basic</option>
+              <option value="standar">VIP Standar</option>
+              <option value="promax" selected>VIP Pro Max</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold mono uppercase mb-1">Durasi (Hari):</label>
+            <input type="number" id="adminDurationDays" min="1" value="30" required class="w-full px-3 py-2 rounded-xl border-2 border-[var(--ink)] bg-white font-mono text-xs focus:outline-none focus:ring-2 focus:ring-[var(--accent)] font-bold">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-fill w-full py-2.5 text-xs font-bold">Aktifkan Paket VIP User</button>
+      </form>
+    </div>
+
+    <!-- Admin Section 3: User List Table -->
+    <div class="mb-5">
+      <h4 class="font-bold text-xs uppercase mono mb-2">Daftar User VIP Aktif</h4>
+      <div class="border-2 border-[var(--ink)] rounded-xl overflow-x-auto bg-white max-h-48">
+        <table class="w-full text-left text-xs font-mono">
+          <thead class="bg-[var(--paper-alt)] border-b-2 border-[var(--ink)]">
+            <tr>
+              <th class="p-2">Email</th>
+              <th class="p-2">Paket</th>
+              <th class="p-2">Sisa Hari</th>
+              <th class="p-2 text-right">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="adminUserTableBody">
+            <!-- Dynamic Users -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Admin Section 4: Statistik & Riwayat Login (khusus admin) -->
+    <div>
+      <h4 class="font-bold text-xs uppercase mono mb-3 flex items-center gap-2">
+        <svg class="w-4 h-4 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Statistik & Riwayat Login User
+      </h4>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div class="p-3 rounded-xl bg-[var(--white-card)] border-2 border-[var(--ink)] shadow-[3px_3px_0_var(--ink)]">
+          <div class="text-[10px] mono uppercase text-[var(--ink-soft)] font-bold">Total User Terdaftar</div>
+          <div class="display text-2xl font-black text-[var(--accent-dark)]" id="statTotalUsers">0</div>
+        </div>
+        <div class="p-3 rounded-xl bg-[var(--white-card)] border-2 border-[var(--ink)] shadow-[3px_3px_0_var(--ink)]">
+          <div class="text-[10px] mono uppercase text-[var(--ink-soft)] font-bold">Total Login Tercatat</div>
+          <div class="display text-2xl font-black text-[var(--accent-dark)]" id="statTotalLogins">0</div>
+        </div>
+      </div>
+      <p class="text-[10px] mono text-[var(--ink-soft)] mb-2">Riwayat login terbaru (khusus terlihat oleh Admin):</p>
+      <div class="border-2 border-[var(--ink)] rounded-xl overflow-x-auto bg-white max-h-56">
+        <table class="w-full text-left text-xs font-mono">
+          <thead class="bg-[var(--paper-alt)] border-b-2 border-[var(--ink)] sticky top-0">
+            <tr>
+              <th class="p-2">Email</th>
+              <th class="p-2">Metode</th>
+              <th class="p-2">Waktu Login</th>
+            </tr>
+          </thead>
+          <tbody id="adminLoginHistoryBody">
+            <!-- Dynamic Login History -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="vipDrawerOverlay">
+  <div class="vip-drawer" id="vipDrawer">
+    <div class="flex items-center justify-between pb-3 mb-5 border-b-3 border-[var(--ink)]">
+      <div class="flex items-center gap-2">
+        <svg class="w-6 h-6 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+        <h2 class="display text-lg font-extrabold">PAKET VIP</h2>
+      </div>
+      <button id="closeVipBtn" onclick="closeVipDrawer()" class="w-8 h-8 border-2 border-[var(--ink)] rounded-xl bg-[var(--white-card)] font-bold flex items-center justify-center hover:bg-[var(--accent)] hover:text-white transition">✕</button>
+    </div>
+
+    <p class="text-xs text-[var(--ink-soft)] mono mb-5 leading-relaxed">
+      Pilih paket VIP terbaik sesuai kebutuhan Anda untuk menikmati proses restorasi definisi tinggi tanpa hambatan.
+    </p>
+
+    <div class="space-y-4">
+      <!-- 1. Basic Plan -->
+      <div class="p-4 rounded-2xl bg-[var(--white-card)] border-3 border-[var(--ink)] shadow-[4px_4px_0_var(--ink)] relative">
+        <div class="flex justify-between items-center mb-1">
+          <span class="mono text-xs font-bold uppercase text-[var(--ink-soft)]">Basic</span>
+          <span class="text-[10px] bg-[var(--accent-light)] text-[var(--ink)] px-2 py-0.5 rounded-full border border-[var(--ink)] mono font-bold">Paket Hemat</span>
+        </div>
+        <div class="display text-2xl mb-1">Rp 9.000<span class="text-xs font-normal text-gray-600"> / 30 Hari</span></div>
+        <p class="text-[11px] text-[var(--ink-soft)] font-medium mb-3 border-b border-[var(--paper-alt)] pb-2">Cocok untuk penggunaan ringan dan perbaikan foto harian.</p>
+        <button onclick="openCheckout('Basic', '9.000')" class="btn btn-line w-full text-center py-2 text-xs font-bold">Beli Basic</button>
+      </div>
+
+      <!-- 2. VIP Standar Plan -->
+      <div class="p-4 rounded-2xl bg-[var(--white-card)] border-3 border-[var(--ink)] shadow-[4px_4px_0_var(--ink)] relative">
+        <div class="flex justify-between items-center mb-1">
+          <span class="mono text-xs font-bold uppercase text-[var(--ink-soft)]">Basic</span>
+          <span class="text-[10px] bg-[var(--accent-light)] text-[var(--ink)] px-2 py-0.5 rounded-full border border-[var(--ink)] mono font-bold">Paket Hemat</span>
+        </div>
+        <div class="display text-2xl mb-1">Rp 9.000<span class="text-xs font-normal text-gray-600"> / 30 Hari</span></div>
+        <p class="text-[11px] text-[var(--ink-soft)] font-medium mb-3 border-b border-[var(--paper-alt)] pb-2">Cocok untuk penggunaan ringan dan perbaikan foto harian.</p>
+        <button onclick="openCheckout('Basic', '9.000')" class="btn btn-line w-full text-center py-2 text-xs font-bold">Beli Basic</button>
+      </div>
+
+      <!-- 2. VIP Standar Plan -->
+      <div class="p-4 rounded-2xl bg-[var(--white-card)] border-3 border-[var(--ink)] shadow-[4px_4px_0_var(--ink)] relative">
+        <div class="flex justify-between items-center mb-1">
+          <span class="mono text-xs font-bold uppercase text-[var(--accent-dark)]">VIP Standar</span>
+          <span class="text-[10px] bg-yellow-300 text-[var(--ink)] px-2 py-0.5 rounded-full border border-[var(--ink)] mono font-bold">Paling Populer</span>
+        </div>
+        <div class="display text-2xl mb-1">Rp 15.000<span class="text-xs font-normal text-gray-600"> / 30 Hari</span></div>
+        <p class="text-[11px] text-[var(--ink-soft)] font-medium mb-3 border-b border-[var(--paper-alt)] pb-2">Pilihan favorit pengguna untuk hasil jernih beresolusi HD 1080p & 2K.</p>
+        <button onclick="openCheckout('VIP Standar', '15.000')" class="btn btn-line w-full text-center py-2 text-xs font-bold">Beli VIP Standar</button>
+      </div>
+
+      <!-- 3. VIP Pro Max Plan -->
+      <div class="p-4 rounded-2xl bg-[var(--ink)] text-[var(--paper)] border-3 border-[var(--ink)] shadow-[5px_5px_0_var(--accent)] relative">
+        <span class="absolute -top-3 right-3 bg-[var(--accent)] text-white text-[9px] mono font-extrabold px-2.5 py-0.5 rounded-full border-2 border-[var(--ink)] tracking-wider">⚡ ALL UNLIMITED</span>
+        <div class="flex justify-between items-center mb-1">
+          <span class="mono text-xs font-bold uppercase text-[var(--accent-light)]">VIP Pro Max</span>
+        </div>
+        <div class="display text-2xl text-[var(--paper)] mb-1">Rp 20.000<span class="text-xs font-normal text-gray-300"> / 30 Hari</span></div>
+        <p class="text-[11px] text-gray-300 font-medium mb-3 border-b border-gray-700 pb-2">Akses penuh tanpa batas (termasuk 4K) untuk profesional & kreator konten.</p>
+        <button onclick="openCheckout('VIP Pro Max', '20.000')" class="btn btn-fill w-full text-center py-2 text-xs font-bold">Beli VIP Pro Max</button>
+      </div>
+
+      <!-- Login Button Pindah Ke Dasbor Sini -->
+      <div class="mt-6 pt-4 border-t-2 border-[var(--ink)]">
+        <button id="authBtn" onclick="openAuthModal()" class="btn btn-line w-full py-3 text-xs font-extrabold border-2 border-[var(--ink)] shadow-[4px_4px_0_var(--ink)]">
+          Masuk / Akses Akun
+        </button>
+        <button id="logoutBtn" onclick="logoutUser()" class="hidden btn btn-line w-full py-3 mt-2 text-xs font-extrabold border-2 border-[var(--ink)] shadow-[4px_4px_0_var(--ink)] hover:bg-red-500 hover:text-white hover:border-red-700">
+          🚪 Keluar / Logout Akun
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="checkoutModal">
+  <div class="modal-box" id="checkoutContent">
+    <div id="checkoutStep1">
+      <div class="flex items-center justify-between pb-3 mb-3 border-b-2 border-[var(--ink)]">
+        <div>
+          <span class="mono text-[10px] uppercase font-bold text-[var(--accent-dark)] block">METODE PEMBAYARAN</span>
+          <h3 class="display text-lg font-bold" id="checkoutPlanTitle">Scan QRIS</h3>
+        </div>
+        <button onclick="closeCheckout()" class="w-8 h-8 border-2 border-[var(--ink)] rounded-xl font-bold flex items-center justify-center hover:bg-[var(--accent)] hover:text-white transition">✕</button>
+      </div>
+
+      <div class="bg-[var(--accent-light)] border-2 border-[var(--ink)] p-3 rounded-2xl mb-4 flex justify-between items-center">
+        <span class="font-bold text-xs uppercase mono">Total Tagihan:</span>
+        <span class="display text-lg text-[var(--accent-dark)]" id="checkoutPlanPrice">Rp 20.000</span>
+      </div>
+
+      <!-- Display Cropped QRIS Image ONLY without payment gateway texts -->
+      <div class="text-center p-4 bg-white rounded-2xl border-2 border-[var(--ink)] shadow-[4px_4px_0_var(--ink)] mb-4">
+        <p class="text-[11px] font-bold mono uppercase mb-2 text-[var(--ink)]">Scan Kode QRIS Di Bawah Ini:</p>
+        <div class="w-56 h-56 mx-auto bg-gray-50 border-2 border-[var(--ink)] rounded-xl flex items-center justify-center p-1 mb-2 overflow-hidden shadow-inner">
+          <img id="userQrisImage" src="" alt="Scan QRIS Pembayaran" class="max-w-full max-h-full object-contain">
+        </div>
+      </div>
+
+      <form id="payForm" onsubmit="processPayment(event)" class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold mono uppercase mb-1">Email / WhatsApp Akun Anda:</label>
+          <input type="text" id="userContact" required placeholder="user@gmail.com" class="w-full px-3 py-2 rounded-xl border-2 border-[var(--ink)] bg-white font-mono text-xs focus:outline-none focus:ring-2 focus:ring-[var(--accent)]">
+        </div>
+        <button type="submit" class="btn btn-fill w-full py-2.5 text-xs font-bold">
+          Saya Sudah Transfer / Bayar
+        </button>
+      </form>
+    </div>
+
+    <div id="checkoutStep2" class="hidden text-center py-6">
+      <div class="w-14 h-14 bg-green-100 border-3 border-[var(--ink)] text-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+      </div>
+      <h3 class="display text-lg font-bold mb-1">PEMBAYARAN DIPROSES</h3>
+      <p class="text-xs text-[var(--ink-soft)] font-mono mb-5">
+        Konfirmasi telah dikirim. Admin akan segera memverifikasi dan mengaktifkan paket VIP Anda.
+      </p>
+      <button onclick="finishCheckout()" class="btn btn-fill px-6 py-2 text-xs font-bold">Selesai</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="fullscreenViewer" style="padding:0;">
+  <div class="fixed inset-0 flex items-center justify-center" style="background:rgba(11,15,25,0.97);">
+    <button onclick="closeFullscreenView()" class="absolute top-4 right-4 z-[520] w-10 h-10 border-2 border-white/40 bg-black/40 text-white rounded-xl font-bold flex items-center justify-center hover:bg-[var(--accent)] hover:border-[var(--ink)] transition">✕</button>
+    <span id="fullscreenLabel" class="absolute top-4 left-4 z-[520] px-3 py-1.5 bg-[var(--accent)] text-white text-[11px] font-bold mono uppercase rounded-lg border border-[var(--ink)]">SEBELUM</span>
+    <img id="fullscreenImg" src="" alt="Pratinjau Full Layar" class="hidden max-w-[96vw] max-h-[92vh] w-auto h-auto object-contain rounded-lg">
+    <video id="fullscreenVideo" src="" controls autoplay class="hidden max-w-[96vw] max-h-[92vh] w-auto h-auto object-contain rounded-lg"></video>
+  </div>
+</div>
+
+<header class="relative z-50 flex items-center justify-between px-3 sm:px-8 py-3 bg-[rgba(244,235,217,0.95)] border-b-3 border-[var(--ink)] gap-2">
+  <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+    <!-- Clean Triple-Dot Icon Button (NO TEXT) -->
+    <button onclick="openVipDrawer()" class="btn-line flex items-center justify-center w-9 h-9 rounded-xl border-2 border-[var(--ink)] hover:bg-[var(--accent-light)] transition cursor-pointer shadow-[2px_2px_0_var(--ink)] active:translate-y-0.5 shrink-0" title="Menu Aplikasi">
+      <svg class="w-5 h-5 text-[var(--ink)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 6h.01M12 12h.01M12 18h.01"/>
+      </svg>
+    </button>
+
+    <div class="flex items-center cursor-pointer shrink-0" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+      <div class="whitespace-nowrap pr-1">
+        <!-- FONT UPCLASELAM BERUBAH MENJADI MONO -->
+        <span class="mono text-base sm:text-xl font-black tracking-wider leading-none block whitespace-nowrap" style="font-family: 'JetBrains Mono', monospace;">UpclaseLam</span>
+        <span class="mono text-[8px] sm:text-[9px] font-extrabold text-[var(--accent-dark)] uppercase tracking-widest block -mt-0.5 whitespace-nowrap"
+       ></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-1.5 sm:gap-3 shrink-0 overflow-x-auto no-scrollbar">
+    <!-- Language Switcher Button -->
+    <div class="lang-switcher shrink-0" onclick="toggleLanguage()" title="Ubah Bahasa">
+      <span id="langIndBtn" class="lang-btn active">IND</span>
+      <span id="langEngBtn" class="lang-btn">ENG</span>
+    </div>
+
+    <!-- User Status Badge -->
+    <div id="userStatusBadge" class="flex items-center bg-[var(--white-card)] px-2.5 sm:px-3 py-1.5 rounded-xl border-2 border-[var(--ink)] mono text-[10px] sm:text-xs font-bold shadow-[2px_2px_0_var(--ink)] shrink-0 whitespace-nowrap">
+      <span id="userStatusText">Free</span>
+    </div>
+
+    <!-- Admin Button (Only visible to lamzy103@gmail.com) -->
+    <button id="adminPanelBtn" onclick="openAdminModal()" class="hidden btn-line px-2.5 sm:px-3 py-1.5 text-xs font-extrabold bg-yellow-300 text-black border-2 border-[var(--ink)] shrink-0">
+      ⚡ Admin
+    </button>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+  
+  <div class="text-center max-w-3xl mx-auto mb-8">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--accent-light)] border-2 border-[var(--ink)] mono text-xs font-bold text-[var(--ink)] mb-3">
+      <span id="langBadge">PIXEL RESTORATION</span>
+    </div>
+    <h1 class="display text-3xl sm:text-5xl font-black leading-tight mb-2" id="langHeroTitle">
+      SULAP FOTO & VIDEO <span class="text-[var(--accent)]">JADI HD MEMUKAU</span>
+    </h1>
+    <p class="text-xs sm:text-sm text-[var(--ink-soft)] max-w-xl mx-auto font-medium" id="langHeroSub">
+      Proses secara instan. Geser slider untuk membandingkan tingkat kejernihan dari piksel ke resolusi tinggi HD secara langsung.
+    </p>
+  </div>
+
+  <section id="studio" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <!-- Left: Canvas Area -->
+    <div class="lg:col-span-8 space-y-4">
+      <div class="media-wrapper group" id="canvasContainer">
+        <canvas id="daisenCanvas" width="1000" height="1000"></canvas>
+        <div class="scanline"></div>
+        <div class="absolute top-4 left-4 z-30">
+          <span id="mediaBadge" class="px-3 py-1.5 bg-[var(--ink)] text-[var(--paper)] text-[10px] font-bold mono uppercase rounded-xl shadow-[2px_2px_0_var(--accent)] border border-[var(--accent)]">
+            Media 1:1 HD
+          </span>
+        </div>
+        <button type="button" onclick="openFullscreenView('before')" class="absolute bottom-4 left-4 z-30 px-3 py-1 bg-[var(--ink)] text-white text-[10px] font-bold mono rounded-lg border border-[var(--ink-soft)] opacity-90 hover:opacity-100 hover:scale-105 transition cursor-pointer" id="lblBefore" title="Lihat foto/video asli sebelum HD">SEBELUM</button>
+        <button type="button" onclick="openFullscreenView('after')" class="absolute bottom-4 right-4 z-30 px-3 py-1 bg-[var(--accent)] text-white text-[10px] font-bold mono rounded-lg border border-[var(--ink)] opacity-90 hover:opacity-100 hover:scale-105 transition cursor-pointer shadow-[2px_2px_0_var(--ink)]" id="lblAfter" title="Lihat hasil HD full layar">SESUDAH (HD)</button>
+        <div class="split-line" id="splitLine" style="left: 50%;">
+          <div class="split-button">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M8 9l-4 4 4 4m8-8l4 4-4 4"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Control Panel -->
+    <div class="lg:col-span-4 space-y-5">
+      <div class="panel-card">
+        <div class="mb-4">
+          <h2 class="display text-xl font-bold mb-1" id="langPanelTitle">Panel Penjernih UpclaseLam</h2>
+          <p class="text-[11px] text-[var(--ink-soft)] mono" id="langPanelSub">Atur parameter atau unggah berkas foto/video Anda.</p>
+        </div>
+
+        <label class="dropzone block mb-5">
+          <input type="file" class="hidden" accept="image/*,video/*" onchange="handleFileUpload(event)">
+          <div class="w-10 h-10 mx-auto bg-white rounded-full border-2 border-[var(--ink)] flex items-center justify-center mb-2 shadow-[2px_2px_0_var(--ink)]">
+            <svg class="w-5 h-5 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          </div>
+          <p class="text-xs font-bold font-mono mb-1 text-[var(--ink)] dz-txt" id="langDropTxt">Tarik Foto / Video Ke Sini</p>
+          <p class="text-[10px] text-[var(--ink-soft)] dz-sub" id="langDropSub">Otomatis deteksi rasio 1:1, 9:16, 16:9</p>
+        </label>
+
+        <div class="space-y-4 mb-6">
+          <div>
+            <div class="flex justify-between text-[11px] font-bold mono uppercase mb-2">
+              <span id="langSharpness">Ketajaman Piksel (Sharpness)</span>
+              <span id="valSharp" class="text-[var(--accent-dark)] bg-[var(--accent-light)] px-2 py-0.5 rounded">2.5x</span>
+            </div>
+            <input type="range" id="sliderSharp" min="1" max="5" step="0.1" value="2.5" oninput="updateCanvasFilters()">
+          </div>
+          <div>
+            <div class="flex justify-between text-[11px] font-bold mono uppercase mb-2">
+              <span id="langContrast">Kontras & HDR Detail</span>
+              <span id="valContrast" class="text-[var(--accent-dark)] bg-[var(--accent-light)] px-2 py-0.5 rounded">125%</span>
+            </div>
+            <input type="range" id="sliderContrast" min="100" max="200" step="1" value="125" oninput="updateCanvasFilters()">
+          </div>
+          <div>
+            <div class="flex justify-between text-[11px] font-bold mono uppercase mb-2">
+              <span id="langSmoothness">Reduksi Noise (Smoothness)</span>
+              <span id="valSmooth" class="text-[var(--accent-dark)] bg-[var(--accent-light)] px-2 py-0.5 rounded">Sedang</span>
+            </div>
+            <input type="range" id="sliderSmooth" min="0" max="3" step="1" value="1" oninput="updateCanvasFilters()">
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <label class="block text-[10px] font-bold mono uppercase mb-2 text-[var(--ink-soft)]" id="langResLabel">Target Resolusi:</label>
+          <div class="grid grid-cols-4 gap-2">
+            <button id="btnRes-720p" onclick="setResolution('720p')" class="py-1.5 text-[10px] font-bold border-2 border-[var(--ink)] rounded-lg bg-[var(--accent)] text-white shadow-[2px_2px_0_var(--ink)] transition">720p</button>
+            <button id="btnRes-1080p" onclick="setResolution('1080p')" class="py-1.5 text-[10px] font-bold border-2 border-[var(--ink)] rounded-lg hover:bg-[var(--accent)] hover:text-white transition">1080p</button>
+            <button id="btnRes-2k" onclick="setResolution('2k')" class="py-1.5 text-[10px] font-bold border-2 border-[var(--ink)] rounded-lg hover:bg-[var(--accent)] hover:text-white transition">2K</button>
+            <button id="btnRes-4k" onclick="setResolution('4k')" class="py-1.5 text-[10px] font-bold border-2 border-[var(--ink)] rounded-lg hover:bg-[var(--accent)] hover:text-white transition">4K</button>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <button onclick="exportResult('photo')" class="btn btn-fill w-full py-3">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            <span id="btnExportPhoto">Simpan Hasil Foto (HD)</span>
+          </button>
+          <button onclick="exportResult('video')" class="btn btn-line w-full py-3 text-[var(--ink-soft)] hover:text-[var(--ink)]">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+            <span id="btnExportVideo">Simpan Frame Video</span>
+          </button>
+        </div>
+        
+        <div class="mt-4 pt-4 border-t-2 border-[var(--paper-alt)]">
+          <div class="flex justify-between items-center text-[10px] font-bold mono uppercase mb-1">
+            <span>Kuota Simpan Harian</span>
+            <span id="limitText" class="text-[var(--accent-dark)]">50 / 50</span>
+          </div>
+          <div class="w-full h-2 bg-[var(--paper-alt)] rounded-full overflow-hidden border border-[var(--ink)]">
+            <div id="limitBar" class="h-full bg-[var(--accent)] w-full transition-all duration-300"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mt-12 pt-8 border-t-3 border-[var(--ink)]">
+    <div class="panel-card bg-[var(--white-card)]">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6 pb-4 border-b-2 border-[var(--ink)]">
+        <div>
+          <span class="mono text-[10px] font-extrabold uppercase text-[var(--accent-dark)] tracking-wider">TENTANG PLATFORM</span>
+          <h2 class="display text-2xl sm:text-3xl font-black">Mengenal UpclaseLam</h2>
+        </div>
+        <span class="px-3 py-1 bg-[var(--accent-light)] border-2 border-[var(--ink)] rounded-xl mono text-xs font-bold text-[var(--ink)]">
+          RESTORASI PIKSEL & KETAJAMAN MEDIA
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="p-4 rounded-xl border-2 border-[var(--ink)] bg-[var(--paper)] shadow-[3px_3px_0_var(--ink)]">
+          <div class="w-10 h-10 rounded-lg bg-[var(--accent)] text-white border-2 border-[var(--ink)] flex items-center justify-center font-bold mb-3 shadow-[2px_2px_0_var(--ink)]">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </div>
+          <h3 class="display text-base font-bold mb-1">Kualitas 1080p, 2K & 4K HD</h3>
+          <p class="text-xs text-[var(--ink-soft)] leading-relaxed font-medium">
+            Proses penjernihan berteknologi tinggi mampu merekonstruksi batas piksel yang hilang dan mempertajam foto menjadi resolusi tinggi (High Definition) hingga tingkat 4K Master secara instan.
+          </p>
+        </div>
+
+        <div class="p-4 rounded-xl border-2 border-[var(--ink)] bg-[var(--paper)] shadow-[3px_3px_0_var(--ink)]">
+          <div class="w-10 h-10 rounded-lg bg-yellow-400 text-black border-2 border-[var(--ink)] flex items-center justify-center font-bold mb-3 shadow-[2px_2px_0_var(--ink)]">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          </div>
+          <h3 class="display text-base font-bold mb-1">Dukungan Semua Rasio</h3>
+          <p class="text-xs text-[var(--ink-soft)] leading-relaxed font-medium">
+            Otomatis menyesuaikan kanvas media digital baik itu rasio 1:1 (Square), 9:16 (Vertikal Portrait), atau 16:9 (Landscape). Tidak perlu di-crop ulang, hasil akan menjaga bentuk aslinya.
+          </p>
+        </div>
+
+        <div class="p-4 rounded-xl border-2 border-[var(--ink)] bg-[var(--paper)] shadow-[3px_3px_0_var(--ink)]">
+          <div class="w-10 h-10 rounded-lg bg-emerald-400 text-black border-2 border-[var(--ink)] flex items-center justify-center font-bold mb-3 shadow-[2px_2px_0_var(--ink)]">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          </div>
+          <h3 class="display text-base font-bold mb-1">Aman & Terpercaya</h3>
+          <p class="text-xs text-[var(--ink-soft)] leading-relaxed font-medium">
+            Berkas gambar diolah melalui protokol yang melindungi aset Anda. Semua modifikasi contrast, smoothness, dan HDR diaplikasikan langsung pada panel penjernih.
+          </p>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-xl bg-[var(--paper-alt)] border-2 border-[var(--ink)] text-xs text-[var(--ink-soft)] leading-relaxed space-y-2 font-medium">
+        <p>
+          <strong class="text-[var(--ink)]">Apa itu UpclaseLam?</strong> UpclaseLam adalah tool enhancer berdesain modern yang bertujuan membantu kreator, fotografer, maupun pengguna kasual untuk membangkitkan foto dan video yang kusam atau beresolusi rendah menjadi tajam serta siap dibagikan ke media sosial.
+        </p>
+        <p>
+          Gunakan slider garis di tengah-tengah foto pratinjau untuk melihat perubahan "Sebelum" (kiri) dan "Sesudah HD" (kanan) dalam hitungan detik. Upgrade paket VIP untuk membuka potensi resolusi unlimited dan filter kustom.
+        </p>
+      </div>
+
+      <div class="mt-6 pt-4 border-t border-[var(--ink)] flex flex-col sm:flex-row items-center justify-between text-[11px] mono text-[var(--ink-soft)] gap-2">
+        <span>© 2026 UpclaseLam. Hak Cipta Dilindungi.</span>
+        <span class="font-bold text-[var(--accent-dark)]">Developer Lamzy</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+const DEFAULT_IMAGE_URL = "https://c.termai.cc/i123/Gq7NREj.jpg";
+const DEFAULT_QRIS_URL = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=UpclaseLam-VIP-Payment-QRIS";
+
+// Fallback 1:1 square Data URL generator if external image fails
+function createDefaultSquarePlaceholder() {
+  const pCanvas = document.createElement('canvas');
+  pCanvas.width = 1000;
+  pCanvas.height = 1000;
+  const pCtx = pCanvas.getContext('2d');
+  
+  // Background gradient
+  const grad = pCtx.createLinearGradient(0, 0, 1000, 1000);
+  grad.addColorStop(0, '#1d4ed8');
+  grad.addColorStop(0.5, '#2563eb');
+  grad.addColorStop(1, '#0f172a');
+  pCtx.fillStyle = grad;
+  pCtx.fillRect(0, 0, 1000, 1000);
+  
+  // Grid pattern
+  pCtx.strokeStyle = 'rgba(255,255,255,0.08)';
+  pCtx.lineWidth = 3;
+  for(let i=0; i<1000; i+=80) {
+    pCtx.beginPath(); pCtx.moveTo(i, 0); pCtx.lineTo(i, 1000); pCtx.stroke();
+    pCtx.beginPath(); pCtx.moveTo(0, i); pCtx.lineTo(1000, i); pCtx.stroke();
+  }
+  
+  // Portrait circle graphics
+  pCtx.fillStyle = '#f4ebd9';
+  pCtx.beginPath(); pCtx.arc(500, 420, 220, 0, Math.PI * 2); pCtx.fill();
+  pCtx.fillStyle = '#2563eb';
+  pCtx.beginPath(); pCtx.arc(500, 380, 120, 0, Math.PI * 2); pCtx.fill();
+  pCtx.fillStyle = '#111827';
+  pCtx.beginPath(); pCtx.arc(500, 780, 320, 0, Math.PI * 2); pCtx.fill();
+
+  // Text tag
+  pCtx.fillStyle = '#ffffff';
+  pCtx.font = '800 48px "JetBrains Mono", monospace';
+  pCtx.textAlign = 'center';
+  pCtx.fillText('UpclaseLam 1:1 HD Demo', 500, 930);
+
+  return pCanvas.toDataURL();
+}
+
+// UpclaseLam memproses foto & video 100% di browser lewat Canvas/WebGL-free
+// pixel processing (beautify + sharpen + upscale bertahap), tanpa API pihak
+// ketiga sama sekali. Semua berkas tidak pernah meninggalkan perangkat user.
+
+// Biaya limit sekali simpan per resolusi (berlaku untuk foto & video)
+const RESOLUTION_COST = { '720p': 5, '1080p': 20, '2k': 35, '4k': 50 };
+
+// ===== Limit User Free: 50 limit, reset otomatis tiap 5 hari =====
+const FREE_LIMIT_QUOTA = 50;
+const FREE_RESET_DAYS = 5;
+const FREE_RESET_MS = FREE_RESET_DAYS * 24 * 60 * 60 * 1000;
+
+function getFreeLimitData(email) {
+  const all = JSON.parse(localStorage.getItem('upclaselam_free_limits') || '{}');
+  return all[email] || null;
+}
+function saveFreeLimitData(email, data) {
+  const all = JSON.parse(localStorage.getItem('upclaselam_free_limits') || '{}');
+  all[email] = data;
+  localStorage.setItem('upclaselam_free_limits', JSON.stringify(all));
+}
+// Set state.limit dari penyimpanan lokal, reset otomatis jika sudah lewat 5 hari
+function applyFreeLimitReset(email) {
+  let data = getFreeLimitData(email);
+  const now = Date.now();
+  if (!data || now >= data.nextReset) {
+    data = { limit: FREE_LIMIT_QUOTA, nextReset: now + FREE_RESET_MS };
+    saveFreeLimitData(email, data);
+  }
+  state.limit = data.limit;
+}
+// Kurangi limit free tersimpan setelah user berhasil menyimpan hasil HD
+function deductFreeLimit(email, amount) {
+  let data = getFreeLimitData(email);
+  const now = Date.now();
+  if (!data || now >= data.nextReset) {
+    data = { limit: FREE_LIMIT_QUOTA, nextReset: now + FREE_RESET_MS };
+  }
+  data.limit = Math.max(0, data.limit - amount);
+  saveFreeLimitData(email, data);
+  state.limit = data.limit;
+}
+function getFreeDaysLeft(email) {
+  const data = getFreeLimitData(email);
+  if (!data) return FREE_RESET_DAYS;
+  return Math.max(1, Math.ceil((data.nextReset - Date.now()) / (24 * 60 * 60 * 1000)));
+}
+function isFreeUser() {
+  if (!state.user) return true;
+  if (state.user.role === 'admin') return false;
+  const userPkg = state.usersDatabase[state.user.email];
+  return !(userPkg && userPkg.expires > Date.now());
+}
+
+
+let state = {
+  lang: 'IND',
+  user: null, 
+  limit: 50,
+  maxLimit: 50,
+  splitPos: 0.5,
+  qrisImage: localStorage.getItem('upclaselam_qris') || DEFAULT_QRIS_URL,
+  usersDatabase: JSON.parse(localStorage.getItem('upclaselam_users') || '{}'),
+  currentImage: null,
+  isVideo: false,
+  hdResultUrl: null,   // Data URL hasil foto HD (diproses lokal via Canvas)
+  hdVideoUrl: null,    // Object URL hasil video HD (diproses lokal via Canvas)
+  isProcessingHD: false,
+  originalMediaUrl: null, // dataURL/URL berkas asli (untuk tombol "SEBELUM")
+  originalVideoUrl: null, // dataURL berkas video asli (untuk tombol "SEBELUM" video)
+  selectedRes: '720p', // resolusi target yang dipilih user
+  // Data pemantauan admin: daftar semua user yang pernah login & riwayat login mereka.
+  // Hanya ditampilkan di Panel Admin (openAdminModal), tidak pernah dirender untuk user biasa.
+  allUsersMeta: JSON.parse(localStorage.getItem('upclaselam_all_users') || '{}'),
+  loginHistory: JSON.parse(localStorage.getItem('upclaselam_login_history') || '[]')
+};
+
+const i18n = {
+  IND: {
+    heroTitle: 'SULAP FOTO & VIDEO <span class="text-[var(--accent)]">JADI HD MEMUKAU</span>',
+    heroSub: 'Proses secara instan. Geser slider untuk membandingkan tingkat kejernihan dari piksel ke resolusi tinggi HD secara langsung.',
+    btnSavePhoto: 'Simpan Hasil Foto (HD)',
+    btnSaveVideo: 'Simpan Frame Video',
+    panelTitle: 'Panel Penjernih UpclaseLam',
+    panelSub: 'Atur parameter atau unggah berkas foto/video Anda.',
+    dropTxt: 'Tarik Foto / Video Ke Sini',
+    dropSub: 'Otomatis deteksi rasio 1:1, 9:16, 16:9',
+    sharpness: 'Ketajaman Piksel (Sharpness)',
+    contrast: 'Kontras & HDR Detail',
+    smoothness: 'Reduksi Noise (Smoothness)',
+    resLabel: 'Target Resolusi:',
+    before: 'SEBELUM',
+    after: 'SESUDAH (HD)',
+    googleBtn: 'Login dengan Google',
+    authTitle: 'LOGIN & DAFTAR AKUN',
+    authSub: 'PORTAL AKSES',
+  },
+  ENG: {
+    heroTitle: 'TURN PHOTOS & VIDEOS <span class="text-[var(--accent)]">INTO STUNNING HD</span>',
+    heroSub: 'Process instantly. Drag slider to compare clarity levels from low-res pixels to high definition HD.',
+    btnSavePhoto: 'Save Photo Result (HD)',
+    btnSaveVideo: 'Save Video Frame',
+    panelTitle: 'UpclaseLam Enhancer Panel',
+    panelSub: 'Adjust parameters or upload your photo/video files.',
+    dropTxt: 'Drag & Drop Photo / Video Here',
+    dropSub: 'Auto detects 1:1, 9:16, 16:9 aspect ratios',
+    sharpness: 'Pixel Sharpness',
+    contrast: 'Contrast & HDR Detail',
+    smoothness: 'Noise Reduction (Smoothness)',
+    resLabel: 'Target Resolution:',
+    before: 'BEFORE',
+    after: 'AFTER (HD)',
+    googleBtn: 'Continue with Google',
+    authTitle: 'LOGIN & REGISTER',
+    authSub: 'ACCESS PORTAL',
+  }
+};
+
+const canvas = document.getElementById('daisenCanvas');
+const ctx = canvas.getContext('2d');
+const splitLine = document.getElementById('splitLine');
+const canvasContainer = document.getElementById('canvasContainer');
+
+window.onload = function() {
+  loadQrisImage();
+  initCanvasWithImage(DEFAULT_IMAGE_URL);
+  setupSplitSlider();
+  checkAuthSession();
+};
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastMsg').innerText = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3500);
+}
+
+function toggleLanguage() {
+  state.lang = state.lang === 'IND' ? 'ENG' : 'IND';
+  document.getElementById('langIndBtn').classList.toggle('active', state.lang === 'IND');
+  document.getElementById('langEngBtn').classList.toggle('active', state.lang === 'ENG');
+
+  const dict = i18n[state.lang];
+  document.getElementById('langHeroTitle').innerHTML = dict.heroTitle;
+  document.getElementById('langHeroSub').innerText = dict.heroSub;
+  document.getElementById('btnExportPhoto').innerText = dict.btnSavePhoto;
+  document.getElementById('btnExportVideo').innerText = dict.btnSaveVideo;
+  document.getElementById('langPanelTitle').innerText = dict.panelTitle;
+  document.getElementById('langPanelSub').innerText = dict.panelSub;
+  document.getElementById('langDropTxt').innerText = dict.dropTxt;
+  document.getElementById('langDropSub').innerText = dict.dropSub;
+  document.getElementById('langSharpness').innerText = dict.sharpness;
+  document.getElementById('langContrast').innerText = dict.contrast;
+  document.getElementById('langSmoothness').innerText = dict.smoothness;
+  document.getElementById('langResLabel').innerText = dict.resLabel;
+  document.getElementById('lblBefore').innerText = dict.before;
+  document.getElementById('lblAfter').innerText = dict.after;
+  document.getElementById('langGoogleBtn').innerText = dict.googleBtn;
+  document.getElementById('langAuthTitle').innerText = dict.authTitle;
+  document.getElementById('langAuthSub').innerText = dict.authSub;
+}
+
+function initCanvasWithImage(url) {
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.src = url;
+  
+  img.onerror = function() {
+    const fallback = createDefaultSquarePlaceholder();
+    if (url !== fallback) {
+      initCanvasWithImage(fallback);
+    }
+  };
+
+  img.onload = function() {
+    state.currentImage = img;
+    state.isVideo = false;
+    state.originalMediaUrl = url;
+    
+    // Auto resolution matching
+    canvas.width = img.width || 1080;
+    canvas.height = img.height || 1080;
+    
+    const ratio = Math.round((canvas.width / canvas.height) * 100) / 100;
+    let badgeTxt = "Media 1:1 HD";
+    if (ratio > 1.3) badgeTxt = "Media 16:9 HD";
+    else if (ratio < 0.8) badgeTxt = "Media 9:16 HD";
+    document.getElementById('mediaBadge').innerText = badgeTxt;
+
+    renderCanvas();
+  };
+}
+
+function renderCanvas() {
+  if (!state.currentImage) return;
+
+  const w = canvas.width;
+  const h = canvas.height;
+  const splitX = w * state.splitPos;
+
+  ctx.clearRect(0, 0, w, h);
+
+  // Before Side
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, 0, splitX, h);
+  ctx.clip();
+  ctx.filter = 'blur(1.5px) contrast(90%)';
+  ctx.drawImage(state.currentImage, 0, 0, w, h);
+  ctx.restore();
+
+  // After Side - pakai hasil HD yang sudah diproses lokal via Canvas jika
+  // sudah tersedia, jika belum diproses tampilkan preview filter sementara
+  const sharpVal = parseFloat(document.getElementById('sliderSharp').value);
+  const contrastVal = parseFloat(document.getElementById('sliderContrast').value);
+  
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(splitX, 0, w - splitX, h);
+  ctx.clip();
+  if (state.hdImage) {
+    ctx.filter = 'none';
+    ctx.drawImage(state.hdImage, 0, 0, w, h);
+  } else {
+    ctx.filter = `contrast(${contrastVal}%) saturate(110%) brightness(102%)`;
+    ctx.drawImage(state.currentImage, 0, 0, w, h);
+  }
+  ctx.restore();
+}
+
+function updateCanvasFilters() {
+  document.getElementById('valSharp').innerText = document.getElementById('sliderSharp').value + 'x';
+  document.getElementById('valContrast').innerText = document.getElementById('sliderContrast').value + '%';
+  const smoothVal = document.getElementById('sliderSmooth').value;
+  const smoothTxts = ['Matikan', 'Sedang', 'Tinggi', 'Maksimal'];
+  document.getElementById('valSmooth').innerText = smoothTxts[smoothVal] || 'Sedang';
+  renderCanvas();
+}
+
+function setupSplitSlider() {
+  let isDragging = false;
+
+  const movePos = (clientX) => {
+    const rect = canvasContainer.getBoundingClientRect();
+    let pos = (clientX - rect.left) / rect.width;
+    pos = Math.max(0.02, Math.min(0.98, pos));
+    state.splitPos = pos;
+    splitLine.style.left = (pos * 100) + '%';
+    renderCanvas();
+  };
+
+  const startDrag = (clientX) => {
+    isDragging = true;
+    canvasContainer.classList.add('select-none');
+    movePos(clientX);
+  };
+  const stopDrag = () => { isDragging = false; };
+
+  // Mouse: mulai drag dari garis ATAU dari mana saja di dalam foto (kecuali tombol SEBELUM/SESUDAH)
+  splitLine.addEventListener('mousedown', (e) => { e.preventDefault(); startDrag(e.clientX); });
+  canvasContainer.addEventListener('mousedown', (e) => {
+    if (e.target.closest('button')) return;
+    startDrag(e.clientX);
+  });
+  window.addEventListener('mouseup', stopDrag);
+  window.addEventListener('mousemove', (e) => { if (isDragging) { e.preventDefault(); movePos(e.clientX); } });
+
+  // Touch (HP/tablet): pakai passive:false + preventDefault supaya jari tidak malah men-scroll halaman
+  const onTouchStart = (e) => {
+    if (e.touches.length === 0) return;
+    if (e.target.closest('button')) return;
+    e.preventDefault();
+    startDrag(e.touches[0].clientX);
+  };
+  splitLine.addEventListener('touchstart', onTouchStart, { passive: false });
+  canvasContainer.addEventListener('touchstart', onTouchStart, { passive: false });
+
+  window.addEventListener('touchmove', (e) => {
+    if (!isDragging || e.touches.length === 0) return;
+    e.preventDefault();
+    movePos(e.touches[0].clientX);
+  }, { passive: false });
+
+  window.addEventListener('touchend', stopDrag);
+  window.addEventListener('touchcancel', stopDrag);
+}
+
+// Fitur mengatur resolusi HD (Free bisa pakai semua resolusi, selama limit cukup)
+function setResolution(res) {
+  if (!state.user) {
+    showToast("Silakan login terlebih dahulu untuk mengubah resolusi!");
+    openAuthModal();
+    return;
+  }
+
+  state.selectedRes = res;
+
+  // Update UI tombol
+  ['720p', '1080p', '2k', '4k'].forEach(r => {
+      const btn = document.getElementById('btnRes-' + r);
+      if (btn) {
+          if (r === res) {
+              btn.className = "py-1.5 text-[10px] font-bold border-2 border-[var(--ink)] rounded-lg bg-[var(--accent)] text-white shadow-[2px_2px_0_var(--ink)] transition";
+          } else {
+              btn.className = "py-1.5 text-[10px] font-bold border-2 border-[var(--ink)] rounded-lg hover:bg-[var(--accent)] hover:text-white transition";
+          }
+      }
+  });
+
+  showToast(`Resolusi target diset ke ${res.toUpperCase()} (butuh ${RESOLUTION_COST[res]} limit sekali simpan)`);
+}
+
+// Batas ukuran berkas supaya proses di perangkat tidak macet/lag
+const MAX_PHOTO_SIZE_MB = 20;
+const MAX_VIDEO_SIZE_MB = 80;
+
+// ======================================================================
+// MESIN BEAUTIFY + HD 100% LOKAL (CANVAS) - gaya "Wink": kulit dihaluskan,
+// wajah dicerahkan, warna lebih hidup, lalu detail tepi (mata/rambut/garis)
+// dipertajam lagi supaya hasil tetap jernih & tidak "buram plastik".
+// Tidak ada request ke server/API pihak ketiga sama sekali.
+// ======================================================================
+
+// Box blur cepat (dipakai sebagai dasar untuk smoothing kulit & unsharp mask)
+function boxBlurData(srcData, w, h, radius) {
+  const out = new Uint8ClampedArray(srcData.length);
+  const idx = (x, y) => (y * w + x) * 4;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      let rSum = 0, gSum = 0, bSum = 0, count = 0;
+      for (let dy = -radius; dy <= radius; dy++) {
+        const ny = y + dy;
+        if (ny < 0 || ny >= h) continue;
+        for (let dx = -radius; dx <= radius; dx++) {
+          const nx = x + dx;
+          if (nx < 0 || nx >= w) continue;
+          const i = idx(nx, ny);
+          rSum += srcData[i]; gSum += srcData[i + 1]; bSum += srcData[i + 2];
+          count++;
+        }
+      }
+      const i = idx(x, y);
+      out[i] = rSum / count;
+      out[i + 1] = gSum / count;
+      out[i + 2] = bSum / count;
+      out[i + 3] = srcData[i + 3];
+    }
+  }
+  return out;
+}
+
+// Deteksi "kemiripan kulit" per-pixel (0..1, halus/feathered) pakai heuristik
+// YCbCr yang umum dipakai di beauty-cam app. Dipakai supaya smoothing hanya
+// kena ke area kulit/wajah, bukan ke background, rambut, atau mata.
+function skinScore(r, g, b) {
+  const y = 0.299 * r + 0.587 * g + 0.114 * b;
+  const cb = 128 - 0.168736 * r - 0.331264 * g + 0.5 * b;
+  const cr = 128 + 0.5 * r - 0.418688 * g - 0.081312 * b;
+  // Feathered range: makin dekat ke pusat rentang kulit, skor makin mendekati 1
+  const cbScore = 1 - Math.min(1, Math.abs(cb - 108) / 30);
+  const crScore = 1 - Math.min(1, Math.abs(cr - 154) / 24);
+  const yScore = y < 20 ? 0 : (y > 235 ? 0.3 : 1);
+  let score = cbScore * crScore * yScore;
+  if (score < 0) score = 0;
+  if (score > 1) score = 1;
+  return score;
+}
+
+// Unsharp mask: hasil = asli + amount * (asli - blur). Dipakai untuk
+// mengembalikan ketajaman tepi (mata, rambut, garis wajah) setelah smoothing.
+function applyUnsharpMask(ctx, w, h, amount = 0.45) {
+  const src = ctx.getImageData(0, 0, w, h);
+  const srcData = src.data;
+  const blurred = boxBlurData(srcData, w, h, 1);
+
+  const out = ctx.createImageData(w, h);
+  const outData = out.data;
+  for (let i = 0; i < srcData.length; i += 4) {
+    outData[i]     = srcData[i]     + amount * (srcData[i]     - blurred[i]);
+    outData[i + 1] = srcData[i + 1] + amount * (srcData[i + 1] - blurred[i + 1]);
+    outData[i + 2] = srcData[i + 2] + amount * (srcData[i + 2] - blurred[i + 2]);
+    outData[i + 3] = srcData[i + 3];
+  }
+  ctx.putImageData(out, 0, 0);
+}
+
+// Smoothing kulit ala "Wink": blend pixel asli dengan versi blur berdasarkan
+// skinScore, jadi kulit terlihat halus & mulus tapi tepi non-kulit tetap tajam.
+function applySkinSmooth(ctx, w, h, strength = 0.55) {
+  const src = ctx.getImageData(0, 0, w, h);
+  const srcData = src.data;
+  const blurred = boxBlurData(srcData, w, h, 3);
+
+  const out = ctx.createImageData(w, h);
+  const outData = out.data;
+  for (let i = 0; i < srcData.length; i += 4) {
+    const r = srcData[i], g = srcData[i + 1], b = srcData[i + 2];
+    const blend = skinScore(r, g, b) * strength;
+    outData[i]     = r + (blurred[i]     - r) * blend;
+    outData[i + 1] = g + (blurred[i + 1] - g) * blend;
+    outData[i + 2] = b + (blurred[i + 2] - b) * blend;
+    outData[i + 3] = srcData[i + 3];
+  }
+  ctx.putImageData(out, 0, 0);
+}
+
+// Upscale bertahap (step-up 1.5x per langkah) supaya interpolasi browser
+// lebih halus dibanding lompat langsung ke ukuran besar -> hasil lebih jernih.
+function stepUpscale(sourceCanvas, targetScale) {
+  let curW = sourceCanvas.width;
+  let curH = sourceCanvas.height;
+
+  let stepCanvas = document.createElement('canvas');
+  stepCanvas.width = curW;
+  stepCanvas.height = curH;
+  let stepCtx = stepCanvas.getContext('2d');
+  stepCtx.drawImage(sourceCanvas, 0, 0);
+
+  let remaining = targetScale;
+  while (remaining > 1.01) {
+    const stepFactor = Math.min(1.5, remaining);
+    const newW = Math.round(curW * stepFactor);
+    const newH = Math.round(curH * stepFactor);
+
+    const next = document.createElement('canvas');
+    next.width = newW;
+    next.height = newH;
+    const nextCtx = next.getContext('2d');
+    nextCtx.imageSmoothingEnabled = true;
+    nextCtx.imageSmoothingQuality = 'high';
+    nextCtx.drawImage(stepCanvas, 0, 0, newW, newH);
+
+    stepCanvas = next;
+    stepCtx = nextCtx;
+    curW = newW; curH = newH;
+    remaining /= stepFactor;
+  }
+
+  return stepCanvas;
+}
+
+// Pipeline lengkap foto: upscale bertahap -> beautify (skin smooth) ->
+// sharpen ulang (unsharp mask) -> color grade (cerah/kontras/saturasi ala Wink).
+function enhancePhotoLocally(img, targetScale = 1.6) {
+  const srcCanvas = document.createElement('canvas');
+  srcCanvas.width = img.naturalWidth || img.width;
+  srcCanvas.height = img.naturalHeight || img.height;
+  const srcCtx = srcCanvas.getContext('2d');
+  srcCtx.imageSmoothingEnabled = true;
+  srcCtx.imageSmoothingQuality = 'high';
+  srcCtx.drawImage(img, 0, 0);
+
+  // 1) Upscale bertahap dulu supaya lebih besar/jernih (HD)
+  const upCanvas = stepUpscale(srcCanvas, targetScale);
+  const upCtx = upCanvas.getContext('2d');
+  const w = upCanvas.width, h = upCanvas.height;
+
+  // 2) Beautify: haluskan kulit/wajah ala Wink (area non-kulit tidak kena)
+  applySkinSmooth(upCtx, w, h, 0.55);
+
+  // 3) Pertajam ulang tepi (mata, rambut, garis) supaya tidak buram
+  applyUnsharpMask(upCtx, w, h, 0.45);
+
+  // 4) Color grade akhir: cerah + kontras + saturasi lembut, ke-bake ke pixel
+  const finalCanvas = document.createElement('canvas');
+  finalCanvas.width = w;
+  finalCanvas.height = h;
+  const finalCtx = finalCanvas.getContext('2d');
+  finalCtx.filter = 'brightness(105%) contrast(107%) saturate(112%)';
+  finalCtx.drawImage(upCanvas, 0, 0);
+
+  return finalCanvas;
+}
+
+// Proses foto sepenuhnya di browser -> dipakai sebagai hasil "SESUDAH HD".
+function processPhotoLocallyFallback(img) {
+  const resultCanvas = enhancePhotoLocally(img, 1.6);
+  const dataUrl = resultCanvas.toDataURL('image/jpeg', 0.95);
+
+  const hdImg = new Image();
+  hdImg.onload = function () {
+    state.hdImage = hdImg;
+    renderCanvas();
+  };
+  hdImg.src = dataUrl;
+
+  state.hdResultUrl = dataUrl;
+  return dataUrl;
+}
+
+// Proses video sepenuhnya di browser: tiap frame digambar ulang ke canvas
+// dengan efek beautify ringan (soft-glow blend, seperti soft-focus di kamera
+// beauty) + color grade cerah/kontras/saturasi, lalu direkam ulang jadi file
+// baru pakai MediaRecorder. Perhitungan per-pixel (skin smooth/unsharp) yang
+// berat sengaja dihindari di sini karena harus jalan real-time tiap frame;
+// sebagai gantinya dipakai trik blur+blend yang tetap cepat (GPU-accelerated
+// oleh browser lewat CSS filter) tapi hasilnya tetap terasa mulus & jernih.
+function processVideoLocallyFallback(file) {
+  return new Promise((resolve, reject) => {
+    const videoEl = document.createElement('video');
+    videoEl.muted = true;
+    videoEl.playsInline = true;
+    videoEl.src = URL.createObjectURL(file);
+
+    videoEl.onloadedmetadata = () => {
+      const vw = videoEl.videoWidth, vh = videoEl.videoHeight;
+
+      // Canvas kecil untuk membuat versi blur (dasar efek soft-skin)
+      const blurCanvas = document.createElement('canvas');
+      blurCanvas.width = vw; blurCanvas.height = vh;
+      const blurCtx = blurCanvas.getContext('2d');
+      blurCtx.filter = 'blur(2.2px)';
+
+      // Canvas utama (output final yang direkam)
+      const vCanvas = document.createElement('canvas');
+      vCanvas.width = vw; vCanvas.height = vh;
+      const vCtx = vCanvas.getContext('2d');
+
+      let stream;
+      try {
+        stream = vCanvas.captureStream(30);
+      } catch (err) {
+        reject(new Error('Browser tidak mendukung perekaman canvas (captureStream).'));
+        return;
+      }
+
+      const mimeCandidates = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
+      const mimeType = mimeCandidates.find(t => window.MediaRecorder && MediaRecorder.isTypeSupported(t)) || '';
+      if (!mimeType) {
+        reject(new Error('Browser tidak mendukung perekaman video (MediaRecorder).'));
+        return;
+      }
+
+      const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 8_000_000 });
+      const chunks = [];
+      recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        resolve(url);
+      };
+      recorder.onerror = (e) => reject(new Error('Gagal merekam video hasil: ' + e.error));
+
+      let drawing = true;
+      function drawFrame() {
+        if (!drawing) return;
+
+        // Lapisan 1: gambar asli tajam (dasar ketajaman/detail)
+        vCtx.filter = 'none';
+        vCtx.globalAlpha = 1;
+        vCtx.drawImage(videoEl, 0, 0, vw, vh);
+
+        // Lapisan 2: versi blur di-blend transparan di atasnya -> efek
+        // "soft-skin glow" ala Wink tanpa perlu proses per-pixel yang berat
+        blurCtx.drawImage(videoEl, 0, 0, vw, vh);
+        vCtx.globalAlpha = 0.32;
+        vCtx.drawImage(blurCanvas, 0, 0, vw, vh);
+        vCtx.globalAlpha = 1;
+
+        // Lapisan 3: color grade akhir supaya lebih cerah/hidup & terlihat HD
+        vCtx.filter = 'brightness(104%) contrast(108%) saturate(115%)';
+        vCtx.drawImage(vCanvas, 0, 0);
+        vCtx.filter = 'none';
+
+        if (!videoEl.paused && !videoEl.ended) {
+          requestAnimationFrame(drawFrame);
+        }
+      }
+
+      videoEl.onended = () => {
+        drawing = false;
+        recorder.stop();
+      };
+
+      recorder.start();
+      videoEl.play().then(() => {
+        requestAnimationFrame(drawFrame);
+      }).catch((err) => {
+        drawing = false;
+        reject(new Error('Gagal memutar video untuk diproses: ' + err.message));
+      });
+    };
+
+    videoEl.onerror = () => reject(new Error('Gagal memuat berkas video untuk diproses.'));
+  });
+}
+
+// Proses file yang di-drag/dipilih user 100% secara lokal (Canvas), tanpa
+// API pihak ketiga sama sekali: beautify (haluskan kulit) + sharpen + HD.
+async function processFileWithHDApi(file) {
+  state.isProcessingHD = true;
+  state.hdResultUrl = null;
+  state.hdVideoUrl = null;
+  try {
+    const sizeMB = file.size / (1024 * 1024);
+    const maxMB = state.isVideo ? MAX_VIDEO_SIZE_MB : MAX_PHOTO_SIZE_MB;
+    if (sizeMB > maxMB) {
+      throw new Error(`Ukuran berkas terlalu besar (${sizeMB.toFixed(1)}MB). Maksimal ${maxMB}MB untuk ${state.isVideo ? 'video' : 'foto'}.`);
+    }
+
+    if (state.isVideo) {
+      showToast("Memproses video (beautify + HD) di perangkat, mohon tunggu...");
+      const localUrl = await processVideoLocallyFallback(file);
+      state.hdVideoUrl = localUrl;
+      showToast("Video berhasil diproses ke HD!");
+    } else {
+      showToast("Memproses foto (beautify + HD) di perangkat, mohon tunggu...");
+      processPhotoLocallyFallback(state.currentImage);
+      showToast("Foto berhasil diproses ke HD!");
+    }
+  } catch (err) {
+    console.error(err);
+    showToast("Gagal memproses HD: " + err.message);
+  } finally {
+    state.isProcessingHD = false;
+  }
+}
+
+
+// Blokir upload file sebelum login
+function handleFileUpload(e) {
+  if (!state.user) {
+    showToast("Silakan login terlebih dahulu untuk upload foto/video!");
+    openAuthModal();
+    e.target.value = "";
+    return;
+  }
+  
+  const file = e.target.files[0];
+  if (!file) return;
+
+  state.isVideo = file.type.startsWith('video/');
+  state.hdImage = null;
+  state.hdResultUrl = null;
+  state.hdVideoUrl = null;
+
+  if (state.isVideo) {
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      state.originalVideoUrl = evt.target.result;
+      showToast("Berkas video dimuat, memulai proses HD...");
+      processFileWithHDApi(file);
+    };
+    reader.readAsDataURL(file);
+  } else {
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      initCanvasWithImage(evt.target.result);
+      showToast("Berhasil memuat berkas!");
+      processFileWithHDApi(file);
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+// ===== Fullscreen Viewer: tombol SEBELUM / SESUDAH =====
+function openFullscreenView(kind) {
+  const overlay = document.getElementById('fullscreenViewer');
+  const imgEl = document.getElementById('fullscreenImg');
+  const videoEl = document.getElementById('fullscreenVideo');
+  const label = document.getElementById('fullscreenLabel');
+
+  // Reset dulu
+  imgEl.classList.add('hidden'); imgEl.src = '';
+  videoEl.classList.add('hidden'); videoEl.pause(); videoEl.src = '';
+
+  if (state.isVideo) {
+    const src = kind === 'before' ? state.originalVideoUrl : state.hdVideoUrl;
+    if (!src) {
+      showToast(kind === 'before'
+        ? "Belum ada video yang diunggah."
+        : "Hasil video HD belum tersedia, tunggu proses selesai atau unggah video dulu.");
+      return;
+    }
+    videoEl.src = src;
+    videoEl.classList.remove('hidden');
+  } else {
+    const src = kind === 'before' ? state.originalMediaUrl : state.hdResultUrl;
+    if (!src) {
+      showToast(kind === 'before'
+        ? "Belum ada foto yang diunggah."
+        : "Hasil foto HD belum tersedia, tunggu proses selesai atau unggah foto dulu.");
+      return;
+    }
+    imgEl.src = src;
+    imgEl.classList.remove('hidden');
+  }
+
+  label.innerText = kind === 'before' ? 'SEBELUM (ASLI)' : 'SESUDAH (HD)';
+  label.style.background = kind === 'before' ? 'var(--ink)' : 'var(--accent)';
+  overlay.classList.add('active');
+}
+
+function closeFullscreenView() {
+  const overlay = document.getElementById('fullscreenViewer');
+  const videoEl = document.getElementById('fullscreenVideo');
+  videoEl.pause();
+  overlay.classList.remove('active');
+}
+
+// ===== Logout Akun =====
+function logoutUser() {
+  state.user = null;
+  localStorage.removeItem('upclaselam_current_user');
+  closeVipDrawer();
+  applyUserPermissions();
+  showToast("Berhasil logout dari akun.");
+}
+
+// Blokir simpan gambar (HD-in) sebelum login
+async function exportResult(type) {
+  if (!state.user) {
+    showToast("Silakan login terlebih dahulu untuk menyimpan hasil HD!");
+    openAuthModal();
+    return;
+  }
+
+  const res = state.selectedRes || '720p';
+  const cost = RESOLUTION_COST[res] || 5;
+
+  if (state.limit < cost) {
+    showToast(`Limit tidak cukup! Simpan di ${res.toUpperCase()} butuh ${cost} limit, sisa limit Anda ${state.limit}.`);
+    if (isFreeUser()) openVipDrawer();
+    return;
+  }
+
+  if (state.isProcessingHD) {
+    showToast("Masih memproses HD, mohon tunggu sebentar...");
+    return;
+  }
+
+  // Potong limit sesuai biaya resolusi yang dipilih
+  if (isFreeUser() && state.user.role !== 'admin') {
+    deductFreeLimit(state.user.email, cost);
+  } else {
+    state.limit -= cost;
+  }
+  updateQuotaUI();
+
+  if (type === 'video') {
+    if (!state.hdVideoUrl) {
+      showToast("Belum ada hasil video HD. Unggah video terlebih dahulu!");
+      return;
+    }
+    showToast(`Berhasil menyimpan hasil Video HD (${res.toUpperCase()}, -${cost} limit)!`);
+    const link = document.createElement('a');
+    link.download = `UpclaseLam_HD_${Date.now()}.mp4`;
+    link.href = state.hdVideoUrl;
+    link.target = '_blank';
+    link.click();
+    return;
+  }
+
+  // type === 'photo'
+  showToast(`Berhasil menyimpan hasil Foto HD (${res.toUpperCase()}, -${cost} limit)!`);
+
+  if (state.hdResultUrl) {
+    try {
+      const apiRes = await fetch(state.hdResultUrl);
+      const blob = await apiRes.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.download = `UpclaseLam_HD_${Date.now()}.png`;
+      link.href = blobUrl;
+      link.click();
+      URL.revokeObjectURL(blobUrl);
+      return;
+    } catch (err) {
+      console.error(err);
+      // fallback ke hasil canvas jika file HD gagal diambil (mis. CORS)
+    }
+  }
+
+  const link = document.createElement('a');
+  link.download = `UpclaseLam_HD_${Date.now()}.png`;
+  link.href = canvas.toDataURL();
+  link.click();
+}
+
+function updateQuotaUI() {
+  const percent = Math.max(0, (state.limit / state.maxLimit) * 100);
+  document.getElementById('limitBar').style.width = percent + '%';
+  document.getElementById('limitText').innerText = `${state.limit} / ${state.maxLimit}`;
+}
+
+function checkAuthSession() {
+  const savedUser = localStorage.getItem('upclaselam_current_user');
+  if (savedUser) {
+    state.user = JSON.parse(savedUser);
+    applyUserPermissions();
+  }
+}
+
+function applyUserPermissions() {
+  const badgeText = document.getElementById('userStatusText');
+  const adminBtn = document.getElementById('adminPanelBtn');
+  const authBtn = document.getElementById('authBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  if (state.user) {
+    authBtn.innerText = state.user.email.split('@')[0];
+    authBtn.classList.add('hidden');
+    logoutBtn.classList.remove('hidden');
+    
+    // Admin lamzy103@gmail.com
+    if (state.user.email.toLowerCase() === 'lamzy103@gmail.com') {
+      state.user.role = 'admin';
+      adminBtn.classList.remove('hidden');
+      badgeText.innerText = 'OWNER / ADMIN';
+      state.limit = 999;
+      state.maxLimit = 999;
+    } else {
+      adminBtn.classList.add('hidden');
+      // Automatic VIP Expiry Checker
+      const userPkg = state.usersDatabase[state.user.email];
+      if (userPkg && userPkg.expires > Date.now()) {
+        badgeText.innerText = userPkg.package.toUpperCase();
+        state.limit = userPkg.package === 'promax' ? 999 : (userPkg.package === 'standar' ? 150 : 50);
+        state.maxLimit = state.limit;
+      } else {
+        if (userPkg && userPkg.expires <= Date.now()) {
+          delete state.usersDatabase[state.user.email]; // Clean up expired logic
+          localStorage.setItem('upclaselam_users', JSON.stringify(state.usersDatabase));
+        }
+        applyFreeLimitReset(state.user.email);
+        badgeText.innerText = 'Free';
+        state.maxLimit = 50;
+      }
+    }
+  } else {
+    badgeText.innerText = 'Free';
+    adminBtn.classList.add('hidden');
+    authBtn.innerText = 'Masuk / Akses Akun';
+    authBtn.classList.remove('hidden');
+    logoutBtn.classList.add('hidden');
+  }
+  updateQuotaUI();
+}
+
+function openAuthModal() { 
+    closeVipDrawer();
+    document.getElementById('authModal').classList.add('active'); 
+}
+function closeAuthModal() { document.getElementById('authModal').classList.remove('active'); }
+
+function switchAuthTab(type) {
+  const loginBtn = document.getElementById('tabLoginBtn');
+  const regBtn = document.getElementById('tabRegisterBtn');
+  const submitBtn = document.getElementById('authSubmitBtn');
+
+  if (type === 'login') {
+    loginBtn.className = 'py-2 text-xs font-extrabold rounded-lg bg-[var(--accent)] text-white shadow-[2px_2px_0_var(--ink)]';
+    regBtn.className = 'py-2 text-xs font-extrabold rounded-lg text-[var(--ink)] hover:bg-[var(--white-card)]';
+    submitBtn.innerText = 'Masuk Sekarang';
+  } else {
+    regBtn.className = 'py-2 text-xs font-extrabold rounded-lg bg-[var(--accent)] text-white shadow-[2px_2px_0_var(--ink)]';
+    loginBtn.className = 'py-2 text-xs font-extrabold rounded-lg text-[var(--ink)] hover:bg-[var(--white-card)]';
+    submitBtn.innerText = 'Daftar Akun Baru';
+  }
+}
+
+// Catat setiap login (email atau google) ke localStorage supaya bisa dipantau Admin.
+// Data ini TIDAK pernah ditampilkan ke user biasa - hanya dibaca oleh renderAdminStats()
+// yang cuma dipanggil dari openAdminModal(), dan tombol Admin sendiri hanya muncul
+// untuk email lamzy103@gmail.com (lihat applyUserPermissions).
+function recordLogin(email, method) {
+  const now = Date.now();
+  const meta = state.allUsersMeta[email.toLowerCase()] || { firstLogin: now, loginCount: 0 };
+  if (!meta.firstLogin) meta.firstLogin = now;
+  meta.lastLogin = now;
+  meta.loginCount = (meta.loginCount || 0) + 1;
+  state.allUsersMeta[email.toLowerCase()] = meta;
+  localStorage.setItem('upclaselam_all_users', JSON.stringify(state.allUsersMeta));
+
+  state.loginHistory.unshift({ email: email.toLowerCase(), method, time: now });
+  if (state.loginHistory.length > 300) state.loginHistory.length = 300;
+  localStorage.setItem('upclaselam_login_history', JSON.stringify(state.loginHistory));
+}
+
+function handleAuthSubmit(e) {
+  e.preventDefault();
+  const email = document.getElementById('authEmail').value;
+  state.user = { email: email, role: 'user' };
+  localStorage.setItem('upclaselam_current_user', JSON.stringify(state.user));
+  recordLogin(email, 'Email/Password');
+  applyUserPermissions();
+  closeAuthModal();
+  showToast(`Selamat datang, ${email}!`);
+}
+
+function loginWithGoogle() {
+  const email = prompt("Simulasi Google Account Login:\nMasukkan alamat Gmail Anda:", "lamzy103@gmail.com");
+  if (email) {
+    state.user = { email: email, role: 'user' };
+    localStorage.setItem('upclaselam_current_user', JSON.stringify(state.user));
+    recordLogin(email, 'Google');
+    applyUserPermissions();
+    closeAuthModal();
+    showToast(`Berhasil login dengan Google (${email})`);
+  }
+}
+
+function openAdminModal() {
+  renderAdminUsersTable();
+  renderAdminStats();
+  document.getElementById('adminModal').classList.add('active');
+}
+
+// Hanya dipanggil dari openAdminModal(), yang hanya bisa dibuka lewat tombol
+// #adminPanelBtn - tombol itu sendiri hanya di-unhide untuk email admin
+// (lihat applyUserPermissions). Jadi user biasa tidak pernah melihat data ini.
+function renderAdminStats() {
+  const totalUsersEl = document.getElementById('statTotalUsers');
+  const totalLoginsEl = document.getElementById('statTotalLogins');
+  const tbody = document.getElementById('adminLoginHistoryBody');
+  if (!totalUsersEl || !totalLoginsEl || !tbody) return;
+
+  totalUsersEl.innerText = Object.keys(state.allUsersMeta).length;
+  totalLoginsEl.innerText = state.loginHistory.length;
+
+  tbody.innerHTML = '';
+  if (state.loginHistory.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="3" class="p-3 text-center text-gray-500">Belum ada riwayat login.</td></tr>';
+    return;
+  }
+  state.loginHistory.slice(0, 50).forEach(entry => {
+    const tr = document.createElement('tr');
+    tr.className = 'border-b border-gray-200';
+    const waktu = new Date(entry.time).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+    tr.innerHTML = `
+      <td class="p-2 font-bold">${entry.email}</td>
+      <td class="p-2 text-[10px] uppercase font-extrabold text-[var(--accent)]">${entry.method}</td>
+      <td class="p-2 text-[10px]">${waktu}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+function closeAdminModal() { document.getElementById('adminModal').classList.remove('active'); }
+
+function loadQrisImage() {
+  const preview = document.getElementById('adminQrisPreview');
+  const userQrisImg = document.getElementById('userQrisImage');
+  if (preview) preview.src = state.qrisImage;
+  if (userQrisImg) userQrisImg.src = state.qrisImage;
+}
+
+function handleQrisUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    state.qrisImage = evt.target.result;
+    localStorage.setItem('upclaselam_qris', state.qrisImage);
+    loadQrisImage();
+    showToast("Foto QRIS Pembayaran Berhasil Diperbarui!");
+  };
+  reader.readAsDataURL(file);
+}
+
+function adminGrantVip(e) {
+  e.preventDefault();
+  const targetEmail = document.getElementById('adminTargetEmail').value.trim().toLowerCase();
+  const pkg = document.getElementById('adminSelectPackage').value;
+  const days = parseInt(document.getElementById('adminDurationDays').value) || 30;
+
+  const expiresAt = Date.now() + (days * 24 * 60 * 60 * 1000); // Admin sets duration expiry
+  state.usersDatabase[targetEmail] = {
+    package: pkg,
+    expires: expiresAt,
+    days: days
+  };
+
+  localStorage.setItem('upclaselam_users', JSON.stringify(state.usersDatabase));
+  renderAdminUsersTable();
+  applyUserPermissions();
+  showToast(`Akun ${targetEmail} berhasil dijadikan ${pkg.toUpperCase()} (${days} Hari)!`);
+}
+
+function renderAdminUsersTable() {
+  const tbody = document.getElementById('adminUserTableBody');
+  tbody.innerHTML = '';
+  const entries = Object.entries(state.usersDatabase);
+  if (entries.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" class="p-3 text-center text-gray-500">Belum ada user VIP aktif.</td></tr>';
+    return;
+  }
+  entries.forEach(([email, data]) => {
+    const daysLeft = Math.max(0, Math.ceil((data.expires - Date.now()) / (1000 * 60 * 60 * 24)));
+    const tr = document.createElement('tr');
+    tr.className = 'border-b border-gray-200';
+    tr.innerHTML = `
+      <td class="p-2 font-bold">${email}</td>
+      <td class="p-2 uppercase text-[10px] font-extrabold text-[var(--accent)]">${data.package}</td>
+      <td class="p-2">${daysLeft} Hari</td>
+      <td class="p-2 text-right">
+        <button onclick="revokeVip('${email}')" class="text-red-600 hover:underline text-[10px]">Hapus</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function revokeVip(email) {
+  delete state.usersDatabase[email];
+  localStorage.setItem('upclaselam_users', JSON.stringify(state.usersDatabase));
+  renderAdminUsersTable();
+  applyUserPermissions();
+  showToast(`Paket VIP untuk ${email} dicabut.`);
+}
+
+function openVipDrawer() { document.getElementById('vipDrawerOverlay').classList.add('active'); }
+function closeVipDrawer() { document.getElementById('vipDrawerOverlay').classList.remove('active'); }
+
+function openCheckout(planName, price) {
+  closeVipDrawer();
+  document.getElementById('checkoutPlanTitle').innerText = planName;
+  document.getElementById('checkoutPlanPrice').innerText = 'Rp ' + price;
+  document.getElementById('checkoutStep1').classList.remove('hidden');
+  document.getElementById('checkoutStep2').classList.add('hidden');
+  document.getElementById('checkoutModal').classList.add('active');
+  loadQrisImage();
+}
+
+function closeCheckout() { document.getElementById('checkoutModal').classList.remove('active'); }
+
+function processPayment(e) {
+  e.preventDefault();
+  document.getElementById('checkoutStep1').classList.add('hidden');
+  document.getElementById('checkoutStep2').classList.remove('hidden');
+}
+
+function finishCheckout() {
+  closeCheckout();
+  showToast("Terima kasih! Pembayaran Anda sedang diverifikasi admin.");
+}
+</script>
+</body>
+</html>
