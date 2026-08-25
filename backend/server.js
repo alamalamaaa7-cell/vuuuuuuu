@@ -31,7 +31,11 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '2mb' }));
 
 // GANTI INI
-app.use(express.static(path.join(process.cwd(), '../public')));
+app.use(express.static(path.join(__dirname, '../public')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
 
 
 const io = new Server(server, { cors: corsOptions });
