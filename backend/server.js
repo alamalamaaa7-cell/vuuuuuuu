@@ -29,8 +29,9 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '2mb' }));
-app.use(express.static(path.join(__dirname, '../public')));
 
+// GANTI INI
+app.use(express.static(path.join(process.cwd(), '../public')));
 
 
 const io = new Server(server, { cors: corsOptions });
@@ -64,8 +65,9 @@ app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/settings', settingsRoutes);
 
+// DAN GANTI INI JUGA
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
+  res.sendFile(path.join(process.cwd(), '../public/index.html'));
 });
 
 app.use((req, res) => res.status(404).json({ error: 'Endpoint tidak ditemukan.' }));
